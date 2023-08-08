@@ -2,24 +2,21 @@
 pragma solidity ^0.8.21;
 
 import "forge-std/Test.sol";     
-// import "forge-std/console.sol";       // use like hardhat console.log
 import "../src/MyToken.sol";
 
 contract ContractTest is Test {
 
     MyToken token;
 
-    // hardhat getSigner() -> vm.addr()
     address alice = vm.addr(0x1);
     address bob = vm.addr(0x2);
 
-    // hardhat beforeEach -> setUp
     function setUp() public {
-        token = new MyToken("Test ERC20 Token","TERC20");
+        token = new MyToken("Test ERC20 Token", "TERC20");
     }
 
     function testName() external {
-        assertEq("Test ERC20 Token",token.name());
+        assertEq("Test ERC20 Token", token.name());
     }
 
     function testSymbol() external {
@@ -33,22 +30,22 @@ contract ContractTest is Test {
 
     function testBurn() public {
         token.mint(alice, 10e18);
-        assertEq(token.balanceOf(alice),10e18);
+        assertEq(token.balanceOf(alice), 10e18);
         
         token.burn(alice, 8e18);
 
         assertEq(token.totalSupply(), 2e18);
-        assertEq(token.balanceOf(alice),2e18);
+        assertEq(token.balanceOf(alice), 2e18);
     }
 
     function testApprove() public {
         assertTrue(token.approve(alice, 1e18));
-        assertEq(token.allowance(address(this),alice), 1e18);
+        assertEq(token.allowance(address(this), alice), 1e18);
     }
 
     function testIncreaseAllowance() external {
         assertEq(token.allowance(address(this), alice), 0);
-        assertTrue(token.increaseAllowance(alice , 2e18));
+        assertTrue(token.increaseAllowance(alice, 2e18));
         assertEq(token.allowance(address(this), alice), 2e18);
     }
 
@@ -82,7 +79,7 @@ contract ContractTest is Test {
     }
 
     function testFailBurnFromZero() external {
-        token.burn(address(0) , 1e18);
+        token.burn(address(0), 1e18);
     }
 
     function testFailBurnInsufficientBalance() external {
@@ -109,13 +106,13 @@ contract ContractTest is Test {
     function testFailTransferFromZeroAddress() external {
         testBurn();
         vm.prank(address(0));
-        token.transfer(alice , 1e18);
+        token.transfer(alice, 1e18);
     }
 
     function testFailTransferInsufficientBalance() external {
         testMint();
         vm.prank(alice);
-        token.transfer(bob , 3e18);
+        token.transfer(bob, 3e18);
     }
 
     function testFailTransferFromInsufficientApprove() external {
@@ -139,23 +136,23 @@ contract ContractTest is Test {
 
     function testFuzzMint(address to, uint256 amount) external {
         vm.assume(to != address(0));
-        token.mint(to,amount);
+        token.mint(to, amount);
         assertEq(token.totalSupply(), token.balanceOf(to));
     }
 
     function testFuzzBurn(address from, uint256 mintAmount, uint256 burnAmount) external {
-        vm.assume(from != address(0));              // from address must not zero
-        burnAmount = bound(burnAmount, 0, mintAmount);    // if burnAmount > mintAmount then bound burnAmount to 0 to mintAmount
-        token.mint(from , mintAmount);
+        vm.assume(from != address(0));
+        burnAmount = bound(burnAmount, 0, mintAmount);
+        token.mint(from, mintAmount);
         token.burn(from, burnAmount);
-        assertEq(token.totalSupply() , mintAmount - burnAmount);
+        assertEq(token.totalSupply(), mintAmount - burnAmount);
         assertEq(token.balanceOf(from), mintAmount - burnAmount);
     }
 
     function testFuzzApprove(address to, uint256 amount) external {
         vm.assume(to != address(0));
-        assertTrue(token.approve(to,amount));
-        assertEq(token.allowance(address(this),to), amount);
+        assertTrue(token.approve(to, amount));
+        assertEq(token.allowance(address(this), to), amount);
     }
 
     function testFuzzTransfer(address to, uint256 amount) external {
@@ -163,12 +160,12 @@ contract ContractTest is Test {
         vm.assume(to != address(this));
         token.mint(address(this), amount);
         
-        assertTrue(token.transfer(to,amount));
+        assertTrue(token.transfer(to, amount));
         assertEq(token.balanceOf(address(this)), 0);
         assertEq(token.balanceOf(to), amount);
     }
 
-    function testFuzzTransferFrom(address from, address to,uint256 approval, uint256 amount) external {
+    function testFuzzTransferFrom(address from, address to, uint256 approval, uint256 amount) external {
         vm.assume(from != address(0));
         vm.assume(to != address(0));
 
@@ -185,7 +182,7 @@ contract ContractTest is Test {
             assertEq(token.allowance(from, address(this)), approval);
         }
         else {
-            assertEq(token.allowance(from,address(this)), approval - amount);
+            assertEq(token.allowance(from, address(this)), approval - amount);
         }
 
         if (from == to) {
@@ -197,7 +194,7 @@ contract ContractTest is Test {
     }
 
     function testFailFuzzBurnInsufficientBalance(address to, uint256 mintAmount, uint256 burnAmount) external {
-        burnAmount = bound(burnAmount, mintAmount+1, type(uint256).max);
+        burnAmount = bound(burnAmount, mintAmount + 1, type(uint256).max);
 
         token.mint(to, mintAmount);
         token.burn(to, burnAmount);
@@ -210,8 +207,8 @@ contract ContractTest is Test {
         token.transfer(to, sendAmount);
     }
 
-    function testFailFuzzTransferFromInsufficientApprove(address from, address to,uint256 approval, uint256 amount) external {
-        amount = bound(amount, approval+1, type(uint256).max);
+    function testFailFuzzTransferFromInsufficientApprove(address from, address to, uint256 approval, uint256 amount) external {
+        amount = bound(amount, approval + 1, type(uint256).max);
 
         token.mint(from, amount);
         vm.prank(from);
@@ -220,7 +217,7 @@ contract ContractTest is Test {
     }
 
     function testFailFuzzTransferFromInsufficientBalance(address from, address to, uint256 mintAmount, uint256 sentAmount) external {
-        sentAmount = bound(sentAmount, mintAmount+1, type(uint256).max);
+        sentAmount = bound(sentAmount, mintAmount + 1, type(uint256).max);
 
         token.mint(from, mintAmount);
         vm.prank(from);
