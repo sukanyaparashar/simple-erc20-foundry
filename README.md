@@ -173,4 +173,6 @@ After successfully running this step you should get console output similar to:
 0x000000000000000000000000000000000000000000000001158e460913d00000
 ```
 
+**Note** The returned value is in hexadecimal form. So you can use this [link](https://www.rapidtables.com/convert/number/hex-to-decimal.html) to convert it into decimal form and check the value.
+
 ## ...Try it with your own contract and have fun!
